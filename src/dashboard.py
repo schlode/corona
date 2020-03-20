@@ -2,6 +2,8 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import math
+
 import matplotlib.gridspec as gridspec
 import datetime
 
@@ -22,7 +24,7 @@ recovered = pd.read_csv(
     "../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
 
 indizes = {'Mexico': 46, 'Germany': 11, 'Sweden': 17, 'Italy': 16, 'Austria': 32}  # , 'Hubei':154}
-days_back = 50
+days_back = 10
 
 # select plot data
 countries = indizes
@@ -40,35 +42,23 @@ conf['France'] = np.array(
 
 confPerMillion = {k: np.array(confirmed[confirmed['Country/Region'] == k].T[v].tolist()[-days_back:]) / people[k] for
                   k, v in countries.items()}
-confPerMillion['USA'] = np.array(
-    confirmed[confirmed['Country/Region'].str.startswith('US')][0:53].sum(axis=0)[-days_back:].tolist()) / people['USA']
-confPerMillion['China'] = np.array(
-    confirmed[confirmed['Country/Region'].str.startswith('Chin')][0:53].sum(axis=0)[-days_back:].tolist()) / people[
-                              'China']
-confPerMillion['France'] = np.array(
-    confirmed[confirmed['Country/Region'].str.startswith('France')][0:53].sum(axis=0)[-days_back:].tolist()) / people[
-                               'France']
+confPerMillion['USA'] = conf['USA']  / people['USA']
+confPerMillion['China'] = conf['China']  / people['China']
+confPerMillion['France'] = conf['France'] / people['France']
 
 deaths = {k: np.array(death[death['Country/Region'] == k].T[v].tolist()[-days_back:]) for k, v in countries.items()}
 deaths['USA'] = np.array(death[death['Country/Region'].str.startswith('US')][0:53].sum(axis=0)[-days_back:].tolist())
-deaths['China'] = np.array(
-    death[death['Country/Region'].str.startswith('Chin')][0:53].sum(axis=0)[-days_back:].tolist())
-deaths['France'] = np.array(
-    death[death['Country/Region'].str.startswith('France')][0:53].sum(axis=0)[-days_back:].tolist())
+deaths['China'] = np.array(death[death['Country/Region'].str.startswith('Chin')][0:53].sum(axis=0)[-days_back:].tolist())
+deaths['France'] = np.array(death[death['Country/Region'].str.startswith('France')][0:53].sum(axis=0)[-days_back:].tolist())
 
-deathsPerMillion = {k: np.array(death[death['Country/Region'] == k].T[v].tolist()[-days_back:]) / people[k] for
-                    k, v in countries.items()}
-deathsPerMillion['USA'] = np.array(
-    confirmed[death['Country/Region'].str.startswith('US')][0:53].sum(axis=0)[-days_back:].tolist()) / people['USA']
-deathsPerMillion['China'] = np.array(
-    confirmed[death['Country/Region'].str.startswith('Chin')][0:53].sum(axis=0)[-days_back:].tolist()) / people[
-                                'China']
-deathsPerMillion['France'] = np.array(
-    confirmed[death['Country/Region'].str.startswith('France')][0:53].sum(axis=0)[-days_back:].tolist()) / people[
-                                 'France']
-
-plt.close('all')
-
+deathsPerMillion = {k: np.array(death[death['Country/Region'] == k].T[v].tolist()[-days_back:]) / people[k] for k, v in countries.items()}
+deathsPerMillion['USA'] = deaths['USA'] / people['USA']
+deathsPerMillion['China'] = deaths['China'] / people['China']
+deathsPerMillion['France'] = deaths['France'] / people['France']
+print('deaths ')
+print(deaths['France'])
+print('deaths per million')
+print(deathsPerMillion['France'])
 
 def plot_figures(figures, nrows=1, ncols=1):
     """Plot a dictionary of figures.
@@ -87,53 +77,63 @@ def plot_figures(figures, nrows=1, ncols=1):
         axeslist.ravel()[ind].set_axis_off()
     plt.tight_layout()  # optional
 
-
-def plot_multi(ax, input_data, x_label, y_label, b_logarithmic=False, ):
+b_legend: bool = True
+def plot_multi(ax, input_data, x_label, y_label, b_logarithmic=False):
+    global b_legend
     for country, data in input_data.items():
         if b_logarithmic:
             ax.semilogy(range(-days_back, 0), data, 'x-', label=country)
         else:
             ax.plot(range(-days_back, 0), data, 'x-', label=country)
-    ax.legend()
+    if (b_legend):
+        ax.legend()
+        b_legend = False
     ax.set_xlabel(xlabel=x_label)
     ax.set_ylabel(ylabel=y_label)
     ax.grid()
 
 def arrangeplots(datatoplot, ncols):
-    # Tweak the figure size to be better suited for a row of numerous plots:
-    # double the width and halve the height. NB: use relative changes because
-    # some styles may have a figure size different from the default one.
-    (fig_width, fig_height) = plt.rcParams['figure.figsize']
-    fig_size = [fig_width * 2, fig_height / 2]
-    numberofplots = datatoplot.__len__()
-    nrows = numberofplots / ncols
+    numberofplots: int = datatoplot.__len__() + 2 # 2 for additional growth factor and days to double
+    nrows: int = math.ceil(numberofplots / ncols)
     fig, axes = plt.subplots(ncols=ncols, nrows=nrows.__int__(), figsize=(15, 10), squeeze=True)
-    iCol = 0
-    iRow = 0
+    i_col: int = 0
+    i_row: int = 0
     for title, data in datatoplot.items():
-        plot_multi(axes[iRow,iCol], data, 'days before today', title)
-        if (iCol >= ncols-1):
-            iRow = iRow + 1
-            iCol = 0
+        plot_multi(axes[i_row,i_col], data, 'days before today', title, True)
+        if i_col >= ncols-1:
+            i_row = i_row + 1
+            i_col = 0
         else:
-            iCol = iCol + 1
+            i_col = i_col + 1
+
+    # growth factor
+    for country, data in deaths.items():
+        axes[i_row,i_col].plot(range(-days_back + 1, 0), data[1:] / data[:-1], label=country)
+    #axes[iRow,iCol].legend()
+    axes[i_row,i_col].set_xlabel('days before today')
+    axes[i_row,i_col].set_ylabel('growth factor deaths/d')
+    axes[i_row,i_col].set_ylim((0.9, 2.8))
+    axes[i_row,i_col].grid()
+
+    if i_col >= ncols - 1:
+        i_row = i_row + 1
+        i_col = 0
+    else:
+        i_col = i_col + 1
+
+    # days to double deaths
+    for country, data in deaths.items():
+        axes[i_row, i_col].plot(range(-days_back + 2, 0), np.log(2) / np.log(np.sqrt(data[2:] / data[:-2])), label=country)
+    axes[i_row,i_col].set_xlabel('days before today')
+    axes[i_row,i_col].set_ylabel('d to double deaths')
+    axes[i_row,i_col].set_ylim((0., 10.))
+    axes[i_row,i_col].grid()
+
+datatoplot = {'deaths': deaths, 'deaths/mn': deathsPerMillion, 'confirmed': conf,
+                  'confirmed/mn': confPerMillion}
+
+arrangeplots(datatoplot, ncols=2);
 
 
-    # Deaths
-
-datatoplot = {'deaths': deaths, 'deaths per million': deathsPerMillion, 'confirmed': conf,
-                  'confirmed per million': confPerMillion}
-
-# fig, ax = plt.subplots(figsize=(10, 5))
-
-arrangeplots(datatoplot, ncols=2)
-
-# plot_multi(deaths, 'days before today', 'deaths', True)
-# plot_multi(deathsPerMillion, 'days before today', 'deaths per million', True)
-
-# Confirmed
-# plotmulti(conf, 'days before today', 'confirmed infections')
-
-# plotmulti(confPerMillion, 'days before today','confirmed infections per million')
 
 plt.show()
