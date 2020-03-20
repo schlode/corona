@@ -40,10 +40,12 @@ conf['China'] = np.array(
 conf['France'] = np.array(
     confirmed[confirmed['Country/Region'].str.startswith('France')][0:53].sum(axis=0)[-days_back:].tolist())
 
-confPerMillion = {k: np.array(confirmed[confirmed['Country/Region'] == k].T[v].tolist()[-days_back:]) / people[k] for
-                  k, v in countries.items()}
-confPerMillion['USA'] = conf['USA']  / people['USA']
-confPerMillion['China'] = conf['China']  / people['China']
+# confPerMillion = {conf[k] / people[k] for k, v in countries.items()}
+confPerMillion = {}
+for k in countries.keys():
+    confPerMillion[k] = conf[k] / people[k]
+confPerMillion['USA'] = conf['USA'] / people['USA']
+confPerMillion['China'] = conf['China'] / people['China']
 confPerMillion['France'] = conf['France'] / people['France']
 
 deaths = {k: np.array(death[death['Country/Region'] == k].T[v].tolist()[-days_back:]) for k, v in countries.items()}
@@ -51,14 +53,17 @@ deaths['USA'] = np.array(death[death['Country/Region'].str.startswith('US')][0:5
 deaths['China'] = np.array(death[death['Country/Region'].str.startswith('Chin')][0:53].sum(axis=0)[-days_back:].tolist())
 deaths['France'] = np.array(death[death['Country/Region'].str.startswith('France')][0:53].sum(axis=0)[-days_back:].tolist())
 
-deathsPerMillion = {k: np.array(death[death['Country/Region'] == k].T[v].tolist()[-days_back:]) / people[k] for k, v in countries.items()}
+# deathsPerMillion = {deaths[k] / people[k] for k, v in countries.items()}
+deathsPerMillion = {}
+for k in countries.keys():
+    deathsPerMillion[k] = deaths[k] / people[k]
 deathsPerMillion['USA'] = deaths['USA'] / people['USA']
 deathsPerMillion['China'] = deaths['China'] / people['China']
 deathsPerMillion['France'] = deaths['France'] / people['France']
 print('deaths ')
-print(deaths['France'])
+print(deaths['Italy'])
 print('deaths per million')
-print(deathsPerMillion['France'])
+print(deathsPerMillion['Italy'])
 
 def plot_figures(figures, nrows=1, ncols=1):
     """Plot a dictionary of figures.
