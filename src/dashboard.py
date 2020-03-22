@@ -56,7 +56,7 @@ def plot_multi(ax, input_data, x_label, y_label, b_logarithmic=False):
 
 import datetime
 
-def arrangeplots(datatoplot, ncols):
+def arrangeplots(datatoplot, ncols, b_logarithmic=True):
     numberofplots: int = datatoplot.__len__() + 2  # 2 for additional growth factor and days to double
     nrows: int = math.ceil(numberofplots / ncols)
     fig, axes = plt.subplots(ncols=ncols, nrows=nrows.__int__(), figsize=(15, 10), squeeze=True, sharex= True)
@@ -64,7 +64,7 @@ def arrangeplots(datatoplot, ncols):
     i_col: int = 0
     i_row: int = 0
     for title, data in datatoplot.items():
-        plot_multi(axes[i_row, i_col], data, 'days before today', title, True)
+        plot_multi(axes[i_row, i_col], data, 'days before today', title, b_logarithmic=b_logarithmic)
         if i_col >= ncols - 1:
             i_row = i_row + 1
             i_col = 0
@@ -96,9 +96,43 @@ def arrangeplots(datatoplot, ncols):
     axes[i_row, i_col].grid()
 
 if __name__ == "__main__":
-    deaths, deathsPerMillion, conf, confPerMillion, recovered, recoveredPerMillion = readData()
+    deaths, conf, recovered, people, countries = readData()
+    confPerMillion = {}
+    for k in countries.keys():
+        confPerMillion[k] = conf[k] / people[k]
+    confPerMillion['USA'] = conf['USA'] / people['USA']
+    confPerMillion['China'] = conf['China'] / people['China']
+    confPerMillion['France'] = conf['France'] / people['France']
+
+    # deathsPerMillion = {deaths[k] / people[k] for k, v in countries.items()}
+    deathsPerMillion = {}
+    for k in countries.keys():
+        deathsPerMillion[k] = deaths[k] / people[k]
+    deathsPerMillion['USA'] = deaths['USA'] / people['USA']
+    deathsPerMillion['China'] = deaths['China'] / people['China']
+    deathsPerMillion['France'] = deaths['France'] / people['France']
+    print('deaths ')
+    print(deaths['Italy'])
+    print('deaths per million')
+    print(deathsPerMillion['Italy'])
+
+    recoveredPerMillion = {}
+    for k in countries.keys():
+        recoveredPerMillion[k] = recovered[k] / people[k]
+    recoveredPerMillion['USA'] = recovered['USA'] / people['USA']
+    recoveredPerMillion['China'] = recovered['China'] / people['China']
+    recoveredPerMillion['France'] = recovered['France'] / people['France']
+
+    deathsPerConfirmed = {}
+    for k in countries.keys():
+        deathsPerConfirmed[k] = deaths[k] / conf[k]
+    deathsPerConfirmed['USA'] = deaths['USA'] / conf['USA']
+    deathsPerConfirmed['China'] = deaths['China'] / conf['China']
+    deathsPerConfirmed['France'] = deaths['France'] / conf['France']
+
+
     datatoplot = {'deaths': deaths, 'deaths/mn': deathsPerMillion, 'confirmed': conf,
-                  'confirmed/mn': confPerMillion}
-    arrangeplots(datatoplot, ncols=3);
+                  'confirmed/mn': confPerMillion, 'deaths/confirmed': deathsPerConfirmed}
+    arrangeplots(datatoplot, ncols=3, b_logarithmic=False);
 
     plt.show()
