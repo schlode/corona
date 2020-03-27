@@ -96,40 +96,24 @@ def arrangeplots(datatoplot, ncols, b_logarithmic=True):
     axes[i_row, i_col].grid()
 
 if __name__ == "__main__":
+    # read absolute data
     deaths, conf, recovered, people, countries = readData()
-    confPerMillion = {}
-    for k in countries.keys():
-        confPerMillion[k] = conf[k] / people[k]
-    confPerMillion['USA'] = conf['USA'] / people['USA']
-    confPerMillion['China'] = conf['China'] / people['China']
-    confPerMillion['France'] = conf['France'] / people['France']
 
-    # deathsPerMillion = {deaths[k] / people[k] for k, v in countries.items()}
+    # create relative datasets
+    confPerMillion = {}
+    for k in conf.keys():
+        confPerMillion[k] = conf[k] / people[k]
     deathsPerMillion = {}
-    for k in countries.keys():
+    for k in deaths.keys():
         deathsPerMillion[k] = deaths[k] / people[k]
-    deathsPerMillion['USA'] = deaths['USA'] / people['USA']
-    deathsPerMillion['China'] = deaths['China'] / people['China']
-    deathsPerMillion['France'] = deaths['France'] / people['France']
-    print('deaths ')
-    print(deaths['Italy'])
-    print('deaths per million')
-    print(deathsPerMillion['Italy'])
 
     recoveredPerMillion = {}
-    # for k in countries.keys():
+    # for k in recovered.keys():
     #     recoveredPerMillion[k] = recovered[k] / people[k]
-    # recoveredPerMillion['USA'] = recovered['USA'] / people['USA']
-    # recoveredPerMillion['China'] = recovered['China'] / people['China']
-    # recoveredPerMillion['France'] = recovered['France'] / people['France']
 
     deathsPerConfirmed = {}
-    for k in countries.keys():
+    for k in deaths.keys():
         deathsPerConfirmed[k] = deaths[k] / conf[k]
-    deathsPerConfirmed['USA'] = deaths['USA'] / conf['USA']
-    deathsPerConfirmed['China'] = deaths['China'] / conf['China']
-    deathsPerConfirmed['France'] = deaths['France'] / conf['France']
-
 
     datatoplot = {'deaths': deaths, 'deaths/mn': deathsPerMillion, 'confirmed': conf,
                   'confirmed/mn': confPerMillion, 'deaths/confirmed': deathsPerConfirmed}

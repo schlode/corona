@@ -4,21 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-#indizes = {'Mexico': 160, 'Germany': 122, 'Spain':203, 'Sweden': 207, 'Italy': 139, 'Austria': 18}  # , 'Hubei':154}
-indizes = {'Mexico': 158, 'Germany': 120, 'Spain':201, 'Sweden': 205, 'Italy': 137, 'Austria': 16}  # , 'Hubei':154}
-#indizes = {'Mexico': 46, 'Germany': 11, 'Spain':18, 'Sweden': 17, 'Italy': 16, 'Austria': 32}  # , 'Hubei':154}
-days_back = 40
+indizes = {'Mexico': 158, 'Germany': 120, 'Spain':201, 'Sweden': 205, 'Italy': 137, 'Austria': 16, 'United Kingdom': 223}#, 'Hubei': 62}
+days_back = 25
 
 def read_input_data():
-    #confirmed = pd.read_csv(
-      #  "../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
     confirmed = pd.read_csv("../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
-    #death = pd.read_csv("../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
     death = pd.read_csv("../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
-    #recovered = pd.read_csv(
-        #"../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
-    recovered = pd.read_csv(
-    "../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
+    recovered = pd.read_csv("../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
     return confirmed, death, recovered
 
 def readData():
@@ -28,9 +20,10 @@ def readData():
     countries = indizes
     # countries = {'Germany': 11, 'Sweden': 17, 'Italy': 16, 'Austria': 32}
     people = {'Germany': 82.79, 'Spain': 46.66, 'Sweden': 10.12, 'Italy': 60.48, 'Austria': 8.822, 'China': 1386, 'USA': 327.2,
-              'France': 66.99, 'Mexico': 129.2, 'Hubei': 57.2}
+              'France': 66.99, 'Mexico': 129.2, 'Hubei': 57.2, 'United Kingdom':66.44}
     conf = {k: np.array(confirmed[confirmed['Country/Region'] == k].T[v].tolist()[-days_back:]) for k, v in
             countries.items()}
+
     conf['USA'] = np.array(
         confirmed[confirmed['Country/Region'].str.startswith('US')][0:53].sum(axis=0)[-days_back:].tolist())
     conf['China'] = np.array(
