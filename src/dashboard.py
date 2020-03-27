@@ -117,11 +117,11 @@ if __name__ == "__main__":
     print(deathsPerMillion['Italy'])
 
     recoveredPerMillion = {}
-    for k in countries.keys():
-        recoveredPerMillion[k] = recovered[k] / people[k]
-    recoveredPerMillion['USA'] = recovered['USA'] / people['USA']
-    recoveredPerMillion['China'] = recovered['China'] / people['China']
-    recoveredPerMillion['France'] = recovered['France'] / people['France']
+    # for k in countries.keys():
+    #     recoveredPerMillion[k] = recovered[k] / people[k]
+    # recoveredPerMillion['USA'] = recovered['USA'] / people['USA']
+    # recoveredPerMillion['China'] = recovered['China'] / people['China']
+    # recoveredPerMillion['France'] = recovered['France'] / people['France']
 
     deathsPerConfirmed = {}
     for k in countries.keys():
